@@ -1,0 +1,2 @@
+To start the programs, just simply run the main menu within VSCode or type "python main_menu.py" in the terminal.
+If the Main Menu doesn't open ensure that the file path is correct and you have pygame installed.
