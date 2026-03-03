@@ -16,8 +16,7 @@ BOX_COLOR = (100, 100, 200)
 BOX_HOVER = (150, 150, 250)
 TEXT_COLOR = (255, 255, 255)
 
-labels = ["Fish Game", "Game 2", "Game 3", "Game 4"]
-# Button/grid sizing
+labels = ["Fish Game", "Maze Game", "Game 3", "Game 4"]
 BUTTON_W = 300
 BUTTON_H = 150
 COLS = 2
@@ -25,7 +24,6 @@ ROWS = 2
 H_SPACING = 100
 V_SPACING = 80
 
-# compute total grid size and top-left to center it
 total_w = COLS * BUTTON_W + (COLS - 1) * H_SPACING
 total_h = ROWS * BUTTON_H + (ROWS - 1) * V_SPACING
 start_x = (SCREEN_WIDTH - total_w) // 2
@@ -59,7 +57,6 @@ while running:
     screen.fill(BG_COLOR)
     mouse_pos = pygame.mouse.get_pos()
 
-    # draw buttons
     for rect, label in buttons:
         color = BOX_COLOR
         if rect.collidepoint(mouse_pos):
@@ -77,8 +74,9 @@ while running:
                 if rect.collidepoint(event.pos):
                     if label == "Fish Game":
                         launch("fish_game.py")
+                    elif label == "Maze Game":
+                        launch("maze_game.py")
                     else:
-                        # placeholders for other games
                         print(f"{label} is not implemented yet.")
 
     pygame.display.flip()

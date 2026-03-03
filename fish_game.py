@@ -23,7 +23,6 @@ except Exception:
     print("Background image not found. Using solid blue background.")
     use_image_bg = False
 
-# vignette (coarse blocks for performance)
 vignette = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
 center_x, center_y = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 max_dist = math.sqrt(center_x**2 + center_y**2)
@@ -107,15 +106,13 @@ for i in range(25):
     fish_list.append(fish)
 
 
-# Menu button (top-left) — semi-transparent and slightly smaller
 MENU_BTN_W = 150
 MENU_BTN_H = 54
 MENU_BTN_X = 20
 MENU_BTN_Y = 20
 menu_rect = pygame.Rect(MENU_BTN_X, MENU_BTN_Y, MENU_BTN_W, MENU_BTN_H)
-# use SRCALPHA surface so the button is semi-transparent
 menu_surf = pygame.Surface((MENU_BTN_W, MENU_BTN_H), pygame.SRCALPHA)
-menu_color = (40, 40, 40, 180)  # RGBA with alpha for semi-transparency
+menu_color = (40, 40, 40, 180) 
 menu_surf.fill(menu_color)
 MENU_FONT = pygame.font.SysFont(None, 28)
 menu_text = MENU_FONT.render("Quit", True, (255, 255, 255))
@@ -144,7 +141,6 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            # check menu button first
             if menu_rect.collidepoint(mouse_pos):
                 launch_main_menu()
                 running = False
@@ -157,10 +153,8 @@ while running:
         fish.move()
         fish.draw(screen)
 
-    # draw vignette
     screen.blit(vignette, (0, 0))
 
-    # draw button shadow, button, border and text (drawn last to ensure visibility)
     shadow_rect = menu_rect.move(4, 4)
     pygame.draw.rect(screen, (30, 30, 30), shadow_rect)
     mouse_over = menu_rect.collidepoint(pygame.mouse.get_pos())
@@ -170,7 +164,7 @@ while running:
         screen.blit(hover_surf, (MENU_BTN_X, MENU_BTN_Y))
     else:
         screen.blit(menu_surf, (MENU_BTN_X, MENU_BTN_Y))
-    pygame.draw.rect(screen, (255, 255, 255), menu_rect, 2)  # white border
+    pygame.draw.rect(screen, (255, 255, 255), menu_rect, 2)
     text_rect = menu_text.get_rect(center=menu_rect.center)
     screen.blit(menu_text, text_rect)
 
