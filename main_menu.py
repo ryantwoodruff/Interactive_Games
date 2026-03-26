@@ -16,7 +16,7 @@ BOX_COLOR = (100, 100, 200)
 BOX_HOVER = (150, 150, 250)
 TEXT_COLOR = (255, 255, 255)
 
-labels = ["Fish Game", "Maze Game", "Game 3", "Game 4"]
+labels = ["Fish Game", "Maze Game", "Bird Game", "Jukebox"]
 BUTTON_W = 300
 BUTTON_H = 150
 COLS = 2
@@ -76,6 +76,10 @@ while running:
                         launch("fish_game.py")
                     elif label == "Maze Game":
                         launch("maze_game.py")
+                    elif label == "Bird Game":
+                        launch("bird_game.py")
+                    elif label == "Jukebox":
+                        launch("jukebox_game.py")    
                     else:
                         print(f"{label} is not implemented yet.")
 
