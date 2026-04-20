@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 import subprocess
+import random
 
 pygame.init()
 pygame.mixer.init()  # Initialize mixer for audio
@@ -34,35 +35,59 @@ for x in range(0, SCREEN_WIDTH, 16):
         vignette.fill((0, 0, 0, min(alpha, 255)), rect)
 
 class Bird:
-    def __init__(self, x, y, width, height, sound_file):
+    def __init__(self, x, y, width, height, sound_folder, cooldown_ms=500):
         self.rect = pygame.Rect(x, y, width, height)
-        self.sound_file = sound_file
-        try:
-            self.sound = pygame.mixer.Sound(sound_file)
-        except Exception as e:
-            print(f"Could not load sound {sound_file}: {e}")
-            self.sound = None
+        self.sound_folder = os.path.join(os.path.dirname(__file__), sound_folder)
+        self.sounds = []
+        self.cooldown_ms = cooldown_ms
+        self.last_chirp_time = 0
+        self.load_sounds()
+
+    def load_sounds(self):
+        if not os.path.isdir(self.sound_folder):
+            print(f"Sound folder not found: {self.sound_folder}")
+            return
+
+        for file_name in sorted(os.listdir(self.sound_folder)):
+            if file_name.lower().endswith(('.wav', '.ogg', '.mp3')):
+                full_path = os.path.join(self.sound_folder, file_name)
+                try:
+                    sound = pygame.mixer.Sound(full_path)
+                    self.sounds.append(sound)
+                except Exception as e:
+                    print(f"Could not load sound {full_path}: {e}")
+
+        if not self.sounds:
+            print(f"No valid sound files found in {self.sound_folder}")
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
     def chirp(self):
-        if self.sound:
-            self.sound.play()
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_chirp_time < self.cooldown_ms:
+            return
 
-# Define birds with their positions and sound files
-# Replace these with actual coordinates and sound files
+        if not self.sounds:
+            return
+
+        sound = random.choice(self.sounds)
+        sound.play()
+        self.last_chirp_time = current_time
+
+# Define birds with their positions and sound folders
+# Create one folder per bird, then place multiple sound files inside.
+# Example folder names: bird1_sounds, bird2_sounds, etc.
 birds = [
-    Bird(310, 210, 100, 100, 'bird1.wav'),  # Black bird on far left
-    Bird(710, 160, 110, 110, 'bird2.wav'),  # Blue bird
-    Bird(700, 490, 130, 130, 'bird3.wav'),  # Orange bird, middle
-    Bird(985, 310, 140, 140, 'bird4.wav'),  # Red bird, middle
-    Bird(1280, 420, 80, 80, 'bird5.wav'),   # Small tan bird
-    Bird(290, 900, 110, 110, 'bird1.wav'),  # morning bird on left
-    Bird(520, 935, 110, 110, 'bird1.wav'),  # mourning bird right of previous
-    Bird(1210, 810, 100, 100, 'bird4.wav'),  # Red bird, middle
-    Bird(1550, 710, 100, 100, 'bird4.wav'),  # blue bird, right
-    # Add more birds as needed
+    Bird(310, 210, 100, 100, 'RWB'),  # Red-Winged Blackbird
+    Bird(710, 160, 110, 110, 'BJ'),  # Blue Jay
+    Bird(700, 490, 130, 130, 'AR'),  # American Robin
+    Bird(985, 310, 140, 140, 'NC'),  # Northern Cardinal
+    Bird(1280, 420, 80, 80, 'BCC'),   # Black Capped Chickadee
+    Bird(290, 900, 110, 110, 'MD'),  # Left Mourning Dove
+    Bird(520, 935, 110, 110, 'MD'),  # Right Mourning Dove
+    Bird(1210, 810, 100, 100, 'HS'),  # House Sparrow
+    Bird(1550, 710, 100, 100, 'EB'),  # Eastern Bluebird
 ]
 
 # Menu button (same as fish game)

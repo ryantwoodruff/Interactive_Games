@@ -118,6 +118,32 @@ MENU_FONT = pygame.font.SysFont(None, 28)
 menu_text = MENU_FONT.render("Quit", True, (255, 255, 255))
 hover_color = (80, 80, 80, 220)
 
+# Button definitions for top right
+BTN_W = 80
+BTN_H = 40
+BTN_MARGIN = 10
+MUTE_BTN_X = SCREEN_WIDTH - BTN_W - BTN_MARGIN
+SKIP_BTN_X = MUTE_BTN_X - BTN_W - BTN_MARGIN
+PREV_BTN_X = SKIP_BTN_X - BTN_W - BTN_MARGIN
+BTN_Y = 20
+
+mute_rect = pygame.Rect(MUTE_BTN_X, BTN_Y, BTN_W, BTN_H)
+skip_rect = pygame.Rect(SKIP_BTN_X, BTN_Y, BTN_W, BTN_H)
+prev_rect = pygame.Rect(PREV_BTN_X, BTN_Y, BTN_W, BTN_H)
+
+mute_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+mute_surf.fill((40, 40, 40, 150))
+skip_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+skip_surf.fill((40, 40, 40, 150))
+prev_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+prev_surf.fill((40, 40, 40, 150))
+
+mute_text = MENU_FONT.render("Mute", True, (255, 255, 255))
+skip_text = MENU_FONT.render("Skip", True, (255, 255, 255))
+prev_text = MENU_FONT.render("Prev", True, (255, 255, 255))
+
+muted = False
+
 
 def launch_main_menu():
     script_path = os.path.join(os.path.dirname(__file__), 'main_menu.py')
@@ -125,6 +151,20 @@ def launch_main_menu():
         subprocess.Popen([sys.executable, script_path])
     except Exception as exc:
         print(f"Failed to launch main_menu.py: {exc}")
+
+def toggle_mute():
+    global muted
+    muted = not muted
+    print(f"Mute toggled: {muted}")
+
+def skip_action():
+    for fish in fish_list:
+        fish.speed = min(fish.speed + 1, 10)  # Increase speed, cap at 10
+
+def previous_action():
+    launch_main_menu()
+    global running
+    running = False
 
 
 running = True
@@ -144,6 +184,13 @@ while running:
             if menu_rect.collidepoint(mouse_pos):
                 launch_main_menu()
                 running = False
+                break
+            elif mute_rect.collidepoint(mouse_pos):
+                toggle_mute()
+            elif skip_rect.collidepoint(mouse_pos):
+                skip_action()
+            elif prev_rect.collidepoint(mouse_pos):
+                previous_action()
                 break
             for fish in fish_list:
                 if fish.is_clicked(mouse_pos):
@@ -167,6 +214,48 @@ while running:
     pygame.draw.rect(screen, (255, 255, 255), menu_rect, 2)
     text_rect = menu_text.get_rect(center=menu_rect.center)
     screen.blit(menu_text, text_rect)
+
+    # Draw mute button
+    shadow_rect = mute_rect.move(4, 4)
+    pygame.draw.rect(screen, (30, 30, 30), shadow_rect)
+    mouse_over = mute_rect.collidepoint(pygame.mouse.get_pos())
+    if mouse_over:
+        hover_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+        hover_surf.fill(hover_color)
+        screen.blit(hover_surf, (MUTE_BTN_X, BTN_Y))
+    else:
+        screen.blit(mute_surf, (MUTE_BTN_X, BTN_Y))
+    pygame.draw.rect(screen, (255, 255, 255), mute_rect, 2)
+    text_rect = mute_text.get_rect(center=mute_rect.center)
+    screen.blit(mute_text, text_rect)
+
+    # Draw skip button
+    shadow_rect = skip_rect.move(4, 4)
+    pygame.draw.rect(screen, (30, 30, 30), shadow_rect)
+    mouse_over = skip_rect.collidepoint(pygame.mouse.get_pos())
+    if mouse_over:
+        hover_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+        hover_surf.fill(hover_color)
+        screen.blit(hover_surf, (SKIP_BTN_X, BTN_Y))
+    else:
+        screen.blit(skip_surf, (SKIP_BTN_X, BTN_Y))
+    pygame.draw.rect(screen, (255, 255, 255), skip_rect, 2)
+    text_rect = skip_text.get_rect(center=skip_rect.center)
+    screen.blit(skip_text, text_rect)
+
+    # Draw previous button
+    shadow_rect = prev_rect.move(4, 4)
+    pygame.draw.rect(screen, (30, 30, 30), shadow_rect)
+    mouse_over = prev_rect.collidepoint(pygame.mouse.get_pos())
+    if mouse_over:
+        hover_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
+        hover_surf.fill(hover_color)
+        screen.blit(hover_surf, (PREV_BTN_X, BTN_Y))
+    else:
+        screen.blit(prev_surf, (PREV_BTN_X, BTN_Y))
+    pygame.draw.rect(screen, (255, 255, 255), prev_rect, 2)
+    text_rect = prev_text.get_rect(center=prev_rect.center)
+    screen.blit(prev_text, text_rect)
 
     pygame.display.flip()
     clock.tick(60)
