@@ -4,6 +4,7 @@ import math
 import os
 import sys
 import subprocess
+from music_manager import MusicManager
 
 pygame.init()
 
@@ -15,12 +16,15 @@ pygame.display.set_caption("Fish Game")
 BLUE = (0, 0, 255)
 FISH_COLORS = [(255, 0, 0), (0, 255, 0), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
 
+base_dir = os.path.dirname(__file__)
 try:
-    background_image = pygame.image.load('background.jpg')
+    background_path = os.path.join(base_dir, 'background.jpg')
+    background_image = pygame.image.load(background_path)
+    print(f"Loaded background: {background_path}")
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     use_image_bg = True
-except Exception:
-    print("Background image not found. Using solid blue background.")
+except Exception as e:
+    print(f"Background image failed: {e}")
     use_image_bg = False
 
 vignette = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -41,28 +45,34 @@ class Fish:
         self.x = x
         self.y = y
         self.direction = 1
-        self.speed = random.randint(1, 4)
+        self.speed = random.randint(1, 3)
         self.fallback_color = fallback_color
         self.use_image = True
 
+        base_dir = os.path.dirname(__file__)
         try:
-            self.original_image = pygame.image.load(image_file)
+            image_path = os.path.join(base_dir, image_file)
+            self.original_image = pygame.image.load(image_path)
+            print(f"Loaded fish image: {image_path}")
             original_width, original_height = self.original_image.get_size()
-            max_width = 100
-            scale_factor = min(max_width / original_width, 1)
+            max_width = 150
+            scale_factor = min(max_width / original_width, 1.0)
             new_width = int(original_width * scale_factor)
             new_height = int(original_height * scale_factor)
             self.original_image = pygame.transform.scale(self.original_image, (new_width, new_height))
-            self.original_image.set_colorkey((255, 255, 255))
+            # Conditional colorkey only if image appears to have white background
+            if self.original_image.get_at((0,0))[:3] == (255,255,255):
+                self.original_image.set_colorkey((255, 255, 255))
             self.flipped_image = pygame.transform.flip(self.original_image, True, False)
-            self.flipped_image.set_colorkey((255, 255, 255))
+            if self.original_image.get_colorkey():
+                self.flipped_image.set_colorkey((255, 255, 255))
             self.width = new_width
             self.height = new_height
-        except Exception:
-            print(f"Image {image_file} not found. Using fallback color.")
+        except Exception as e:
+            print(f"Fish image {image_file} failed: {e}. Using fallback color.")
             self.use_image = False
-            self.width = 50
-            self.height = 20
+            self.width = 100
+            self.height = 40
 
         self.update_image()
 
@@ -95,7 +105,7 @@ class Fish:
 
 
 fish_list = []
-for i in range(25):
+for i in range(11):
     image_file = random.choice(FISH_IMAGES)
     fallback_color = random.choice(FISH_COLORS)
     fish = Fish(0, 0, image_file, fallback_color)
@@ -105,45 +115,42 @@ for i in range(25):
     fish.y = y
     fish_list.append(fish)
 
+music = MusicManager('music')
 
-MENU_BTN_W = 150
-MENU_BTN_H = 54
+MENU_BTN_W = 120
+MENU_BTN_H = 60
 MENU_BTN_X = 20
-MENU_BTN_Y = 20
+MENU_BTN_Y = SCREEN_HEIGHT - 80
 menu_rect = pygame.Rect(MENU_BTN_X, MENU_BTN_Y, MENU_BTN_W, MENU_BTN_H)
 menu_surf = pygame.Surface((MENU_BTN_W, MENU_BTN_H), pygame.SRCALPHA)
 menu_color = (40, 40, 40, 180) 
 menu_surf.fill(menu_color)
-MENU_FONT = pygame.font.SysFont(None, 28)
+MENU_FONT = pygame.font.SysFont(None, 32)
 menu_text = MENU_FONT.render("Quit", True, (255, 255, 255))
 hover_color = (80, 80, 80, 220)
 
-# Button definitions for top right
-BTN_W = 80
-BTN_H = 40
-BTN_MARGIN = 10
-MUTE_BTN_X = SCREEN_WIDTH - BTN_W - BTN_MARGIN
-SKIP_BTN_X = MUTE_BTN_X - BTN_W - BTN_MARGIN
-PREV_BTN_X = SKIP_BTN_X - BTN_W - BTN_MARGIN
-BTN_Y = 20
+# Button definitions for bottom right
+BTN_W = 120
+BTN_H = 60
+MUTE_BTN_X = 1660
+SKIP_BTN_X = 1780
+PREV_BTN_X = 1540
+BTN_Y = SCREEN_HEIGHT - 80
 
 mute_rect = pygame.Rect(MUTE_BTN_X, BTN_Y, BTN_W, BTN_H)
 skip_rect = pygame.Rect(SKIP_BTN_X, BTN_Y, BTN_W, BTN_H)
 prev_rect = pygame.Rect(PREV_BTN_X, BTN_Y, BTN_W, BTN_H)
 
 mute_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
-mute_surf.fill((40, 40, 40, 150))
+mute_surf.fill((40, 40, 40, 180))
 skip_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
-skip_surf.fill((40, 40, 40, 150))
+skip_surf.fill((40, 40, 40, 180))
 prev_surf = pygame.Surface((BTN_W, BTN_H), pygame.SRCALPHA)
-prev_surf.fill((40, 40, 40, 150))
+prev_surf.fill((40, 40, 40, 180))
 
 mute_text = MENU_FONT.render("Mute", True, (255, 255, 255))
 skip_text = MENU_FONT.render("Skip", True, (255, 255, 255))
 prev_text = MENU_FONT.render("Prev", True, (255, 255, 255))
-
-muted = False
-
 
 def launch_main_menu():
     script_path = os.path.join(os.path.dirname(__file__), 'main_menu.py')
@@ -151,20 +158,6 @@ def launch_main_menu():
         subprocess.Popen([sys.executable, script_path])
     except Exception as exc:
         print(f"Failed to launch main_menu.py: {exc}")
-
-def toggle_mute():
-    global muted
-    muted = not muted
-    print(f"Mute toggled: {muted}")
-
-def skip_action():
-    for fish in fish_list:
-        fish.speed = min(fish.speed + 1, 10)  # Increase speed, cap at 10
-
-def previous_action():
-    launch_main_menu()
-    global running
-    running = False
 
 
 running = True
@@ -185,16 +178,17 @@ while running:
                 launch_main_menu()
                 running = False
                 break
-            elif mute_rect.collidepoint(mouse_pos):
-                toggle_mute()
-            elif skip_rect.collidepoint(mouse_pos):
-                skip_action()
             elif prev_rect.collidepoint(mouse_pos):
-                previous_action()
-                break
+                music.play_previous()
+            elif mute_rect.collidepoint(mouse_pos):
+                music.mute()
+            elif skip_rect.collidepoint(mouse_pos):
+                music.skip()
             for fish in fish_list:
                 if fish.is_clicked(mouse_pos):
                     fish.reverse_direction()
+
+    music.update()
 
     for fish in fish_list:
         fish.move()
